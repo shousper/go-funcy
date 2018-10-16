@@ -62,5 +62,5 @@ Maps (requires `-key-field` match):
 Slices:
 
 - [SliceOf](./fragments/slice.go#L9)
-- [SliceOfAsMap](./fragments/map.go#L19) (requires `-key-field` match)
-- [SliceOfGroupBys](./fragments/map.go#L45)
+- [SliceOfAsMap](./fragments/slice.go#L19) (requires `-key-field` match)
+- [SliceOfGroupBys](./fragments/slice.go#L45)
