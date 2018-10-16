@@ -2,9 +2,9 @@ package example
 
 import "github.com/shousper/go-funcy/example/sub"
 
-//go:generate funcy -type Bar -key-field ID -generators SliceOf*,MapOf
-//go:generate funcy -type Foo -key-field Key
-//go:generate funcy -type D -key-field E
+//go:generate funcy --generators SliceOf*,MapOf Bar
+//go:generate funcy -k=Key Foo
+//go:generate funcy -k E D
 
 // Bar similar to Foo
 type Bar struct {
