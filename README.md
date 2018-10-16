@@ -12,6 +12,8 @@ funcy -h
 
 ```
 Usage of funcy:
+  -generators string
+    	Name of generators to run
   -group-fields string
     	Name of fields to group by (comma delimited)
   -key-field string
@@ -19,7 +21,7 @@ Usage of funcy:
   -path string
     	Type import path
   -type string
-    	Names of type to generate against
+    	Name of type to generate against
   -v	Verbose output
 ```
 
@@ -49,7 +51,7 @@ Or invoke manually, via `make`, whatever, and you'll get [this](./example/foo.fu
 
 ## Generators
 
-Maps:
+Maps (requires `-key-field` match):
 
 - [MapOf](./fragments/map.go#L9)
 - [MapOfKeys](./fragments/map.go#L19)
@@ -60,5 +62,5 @@ Maps:
 Slices:
 
 - [SliceOf](./fragments/slice.go#L9)
-- [SliceOfAsMap](./fragments/map.go#L19)
+- [SliceOfAsMap](./fragments/map.go#L19) (requires `-key-field` match)
 - [SliceOfGroupBys](./fragments/map.go#L45)

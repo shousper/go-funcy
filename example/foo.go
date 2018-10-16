@@ -2,7 +2,7 @@ package example
 
 import "github.com/shousper/go-funcy/example/sub"
 
-//go:generate funcy -type Bar -key-field ID
+//go:generate funcy -type Bar -key-field ID -generators SliceOf*,MapOf
 //go:generate funcy -type Foo -key-field Key
 //go:generate funcy -type D -key-field E
 

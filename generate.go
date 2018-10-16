@@ -48,17 +48,33 @@ func writeType(basePath, sourcePackage string, cfg *model.Config) error {
 
 	m := model.Create(cfg)
 
-	fragments.SliceOf(f, m)
-	fragments.SliceOfGroupBys(f, m)
+	if isGeneratorEnabled(cfg, "SliceOf") {
+		fragments.SliceOf(f, m)
+	}
+	if isGeneratorEnabled(cfg, "SliceOfGroupBys") {
+		fragments.SliceOfGroupBys(f, m)
+	}
 
 	if m.Map.Key != nil {
-		fragments.SliceOfAsMap(f, m)
+		if isGeneratorEnabled(cfg, "SliceOfAsMap") {
+			fragments.SliceOfAsMap(f, m)
+		}
 
-		fragments.MapOf(f, m)
-		fragments.MapOfKeys(f, m)
-		fragments.MapOfValues(f, m)
-		fragments.MapOfSelect(f, m)
-		fragments.MapOfGroupBys(f, m)
+		if isGeneratorEnabled(cfg, "MapOf") {
+			fragments.MapOf(f, m)
+		}
+		if isGeneratorEnabled(cfg, "MapOfKeys") {
+			fragments.MapOfKeys(f, m)
+		}
+		if isGeneratorEnabled(cfg, "MapOfValues") {
+			fragments.MapOfValues(f, m)
+		}
+		if isGeneratorEnabled(cfg, "MapOfSelect") {
+			fragments.MapOfSelect(f, m)
+		}
+		if isGeneratorEnabled(cfg, "MapOfGroupBys") {
+			fragments.MapOfGroupBys(f, m)
+		}
 	}
 
 	name := strcase.ToSnake(cfg.Type.Name.Name)
@@ -92,4 +108,19 @@ func loadPackage(basePath string, fset *token.FileSet, pkg *build.Package, typeN
 	}
 
 	return result, nil
+}
+
+func isGeneratorEnabled(cfg *model.Config, name string) bool {
+	if len(cfg.Generators) == 0 {
+		return true
+	}
+	for _, g := range cfg.Generators {
+		if g == name {
+			return true
+		}
+		if strings.HasSuffix(g, "*") && strings.HasPrefix(name, strings.TrimRight(g, "*")) {
+			return true
+		}
+	}
+	return false
 }
