@@ -13,8 +13,8 @@ func (s SliceOfApple) GroupByBreed() map[string][]*Apple {
 }
 
 // AsMap maps slice values by Color
-func (s SliceOfApple) AsMap() MapOfApple {
-	result := make(MapOfApple)
+func (s SliceOfApple) AsMap() map[[4]byte]*Apple {
+	result := make(map[[4]byte]*Apple)
 	for _, value := range s {
 		result[value.Color] = value
 	}

@@ -24,8 +24,8 @@ func (s SliceOfD) GroupByApple() map[*sub.Apple][]D {
 }
 
 // AsMap maps slice values by E()
-func (s SliceOfD) AsMap() MapOfD {
-	result := make(MapOfD)
+func (s SliceOfD) AsMap() map[string]D {
+	result := make(map[string]D)
 	for _, value := range s {
 		result[value.E()] = value
 	}

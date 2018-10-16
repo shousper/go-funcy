@@ -13,13 +13,16 @@ import (
 )
 
 var (
-	targetPath, targetType, keyField, groupFields string
-	verbose                                       bool
+	targetType, targetPath string
+	generators             string
+	keyField, groupFields  string
+	verbose                bool
 )
 
 func init() {
 	flag.StringVar(&targetType, "type", "", "Name of type to generate against")
 	flag.StringVar(&targetPath, "path", "", "Type import path")
+	flag.StringVar(&generators, "generators", "", "Name of generators to run")
 	flag.StringVar(&keyField, "key-field", "ID", "Name of map key field")
 	flag.StringVar(&groupFields, "group-fields", "", "Name of fields to group by (comma delimited)")
 	flag.BoolVar(&verbose, "v", false, "Verbose output")
@@ -48,15 +51,22 @@ func init() {
 func main() {
 	logrus.Info("Processing ", targetType, " from ", targetPath)
 
-	groupFieldValues := strings.Split(groupFields, ",")
-	if len(groupFieldValues) == 1 && groupFieldValues[0] == "" {
-		groupFieldValues = nil
-	}
+	groupFieldValues := stringSliceOrNil(groupFields)
+	generatorValues := stringSliceOrNil(generators)
 
 	if err := funcy.Generate(targetPath, targetType, &model.Config{
+		Generators: generatorValues,
 		KeyField:    keyField,
 		GroupFields: groupFieldValues,
 	}); err != nil {
 		logrus.Fatal(err)
 	}
+}
+
+func stringSliceOrNil(value string) []string {
+	values := strings.Split(value, ",")
+	if len(values) == 1 && values[0] == "" {
+		return nil
+	}
+	return values
 }

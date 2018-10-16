@@ -40,8 +40,8 @@ func (s SliceOfFoo) GroupByInterfaceField() map[D][]*Foo {
 }
 
 // AsMap maps slice values by Key
-func (s SliceOfFoo) AsMap() MapOfFoo {
-	result := make(MapOfFoo)
+func (s SliceOfFoo) AsMap() map[int]*Foo {
+	result := make(map[int]*Foo)
 	for _, value := range s {
 		result[value.Key] = value
 	}

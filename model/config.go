@@ -7,6 +7,7 @@ type Config struct {
 	Type    *ast.TypeSpec
 	Imports []*ast.ImportSpec
 
+	Generators  []string
 	KeyField    string
 	GroupFields []string
 	MapPrefix   string

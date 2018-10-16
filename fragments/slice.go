@@ -27,14 +27,16 @@ func SliceOf(f *File, m model.Model) {
 //	}
 //
 func SliceOfAsMap(f *File, m model.Model) {
+	outType := Map(toType(*m.Map.Key)).Add(asType(m))
+
 	f.Commentf("AsMap maps slice values by %s", m.Map.Key.Accessor)
 	f.Func().
 		Params(Id("s").Id(m.Slice.Name)).
 		Id("AsMap").
 		Params().
-		Id(m.Map.Name).
+		Add(outType).
 		Block(
-			Id("result").Op(":=").Make(Id(m.Map.Name)),
+			Id("result").Op(":=").Make(outType),
 			For(List(Id("_"), Id("value")).Op(":=").Range().Id("s")).Block(
 				Id("result").Index(Id("value").Dot(m.Map.Key.Accessor)).Op("=").Id("value"),
 			),
