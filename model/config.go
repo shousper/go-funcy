@@ -7,6 +7,7 @@ type Config struct {
 	Imports []*ast.ImportSpec
 
 	KeyField    string
+	GroupFields []string
 	MapPrefix   string
 	SlicePrefix string
 }

@@ -9,13 +9,30 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Model type information for
 type Model struct {
 	Type        string
 	IsInterface bool
 	Map         MapModel
 	Slice       FieldModel
-	GroupBys    []*FieldModel
-	Imports     []*ast.ImportSpec
+	GroupBys    []FieldModel
+	Imports     []ImportModel
+}
+
+type FieldModel struct {
+	Name     string
+	Type     string
+	Accessor string
+}
+
+type MapModel struct {
+	Name string
+	Key  *FieldModel
+}
+
+type ImportModel struct {
+	Name string
+	Path string
 }
 
 func Create(cfg *Config) Model {
@@ -72,13 +89,27 @@ func Create(cfg *Config) Model {
 			result.Map.Key = &field
 		}
 		result.Imports = append(result.Imports, imports...)
-		result.GroupBys = append(result.GroupBys, &field)
+		if shouldGroupBy(cfg, fieldName) {
+			result.GroupBys = append(result.GroupBys, field)
+		}
 	}
 
 	return result
 }
 
-func resolveFieldType(cfg *Config, field ast.Expr) (string, []*ast.ImportSpec) {
+func shouldGroupBy(cfg *Config, field string) bool {
+	if len(cfg.GroupFields) == 0 {
+		return true
+	}
+	for _, g := range cfg.GroupFields {
+		if g == field {
+			return true
+		}
+	}
+	return false
+}
+
+func resolveFieldType(cfg *Config, field ast.Expr) (string, []ImportModel) {
 	switch ft := field.(type) {
 	case *ast.StarExpr:
 		switch i := ft.X.(type) {
@@ -87,8 +118,15 @@ func resolveFieldType(cfg *Config, field ast.Expr) (string, []*ast.ImportSpec) {
 		case *ast.SelectorExpr:
 			selectedType, imports := resolveFieldType(cfg, i.X)
 			for _, im := range cfg.Imports {
-				if im.Name != nil && im.Name.Name == selectedType || strings.HasSuffix(im.Path.Value, "/"+selectedType+`"`) {
-					imports = append(imports, im)
+				name := ""
+				if im.Name != nil {
+					name = im.Name.Name
+				}
+				if name == selectedType || strings.HasSuffix(im.Path.Value, "/"+selectedType+`"`) {
+					imports = append(imports, ImportModel{
+						Name: name,
+						Path: im.Path.Value,
+					})
 				}
 			}
 			return "*" + selectedType + "." + i.Sel.Name, imports
