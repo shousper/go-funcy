@@ -11,7 +11,7 @@ import (
 //	type MapOfT map[K]T
 //
 func MapOf(f *File, m model.Model) {
-	f.Add(Commentf("%s is a string map of %s", m.Map.Name, m.Type))
+	f.Commentf("%s is a string map of %s", m.Map.Name, m.Type)
 	f.Type().Id(m.Map.Name).
 		Map(Id(m.Map.Key.Type)).Add(asType(m))
 }
@@ -26,7 +26,7 @@ func MapOf(f *File, m model.Model) {
 //	}
 //
 func MapOfKeys(f *File, m model.Model) {
-	f.Add(Comment("Keys returns a slice of the map keys"))
+	f.Comment("Keys returns a slice of the map keys")
 	f.Func().
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Keys").
@@ -50,7 +50,7 @@ func MapOfKeys(f *File, m model.Model) {
 //	}
 //
 func MapOfValues(f *File, m model.Model) {
-	f.Add(Comment("Values returns a slice of the map values"))
+	f.Comment("Values returns a slice of the map values")
 	f.Func().
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Values").
@@ -77,7 +77,7 @@ func MapOfValues(f *File, m model.Model) {
 //	}
 //
 func MapOfSelect(f *File, m model.Model) {
-	f.Add(Comment("Select returns a map with only the given keys"))
+	f.Comment("Select returns a map with only the given keys")
 	f.Func().
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Select").
@@ -99,8 +99,8 @@ func MapOfSelect(f *File, m model.Model) {
 
 // MapOfGroupBys produces maps regrouped by a field value
 //
-//	func (m MapOfT) GroupByF() map[J]T {
-//		result := make(map[J]T)
+//	func (m MapOfT) GroupByF() map[J][]T {
+//		result := make(map[J][]T)
 //		for _, value := range m {
 //			result[value.F] = append(result[value.F], value)
 //		}

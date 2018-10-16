@@ -11,7 +11,7 @@ import (
 //	type SliceOfT []T
 //
 func SliceOf(f *File, m model.Model) {
-	f.Add(Commentf("%s is a string slice of %s", m.Slice.Name, m.Type))
+	f.Commentf("%s is a string slice of %s", m.Slice.Name, m.Type)
 	f.Type().Id(m.Slice.Name).
 		Index().Add(asType(m))
 }
@@ -46,8 +46,8 @@ func SliceOfAsMap(f *File, m model.Model) {
 
 // SliceOfGroupBys produce a maps of slice values grouped by a field value
 //
-//	func (s SliceOfT) GroupByF() map[J]T {
-//		result := make(map[J]T)
+//	func (s SliceOfT) GroupByF() map[J][]T {
+//		result := make(map[J][]T)
 //		for _, value := range s {
 //			result[value.F] = append(result[value.F], value)
 //		}
