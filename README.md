@@ -46,3 +46,19 @@ Add a `go:generate` like:
 ```
 
 Or invoke manually, via `make`, whatever, and you'll get [this](./example/foo.funcy.go).
+
+## Generators
+
+Maps:
+
+- [MapOf](./fragments/map.go#L9)
+- [MapOfKeys](./fragments/map.go#L19)
+- [MapOfValues](./fragments/map.go#L43)
+- [MapOfSelect](./fragments/map.go#L67)
+- [MapOfGroupBys](./fragments/map.go#L100)
+
+Slices:
+
+- [SliceOf](./fragments/slice.go#L9)
+- [SliceOfAsMap](./fragments/map.go#L19)
+- [SliceOfGroupBys](./fragments/map.go#L45)

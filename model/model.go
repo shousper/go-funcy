@@ -9,32 +9,32 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Model type information for
+// Model type information for generation output
+// Passed to fragments to create functions
 type Model struct {
 	Type        string
 	IsInterface bool
 	Map         MapModel
 	Slice       FieldModel
 	GroupBys    []FieldModel
-	Imports     []ImportModel
 }
 
+// FieldModel represents struct or interface field/method information used for generation
 type FieldModel struct {
 	Name     string
 	Type     string
+	Qual     string
+	Pointer  bool
 	Accessor string
 }
 
+// MapModel represents information for map fragment generation
 type MapModel struct {
 	Name string
 	Key  *FieldModel
 }
 
-type ImportModel struct {
-	Name string
-	Path string
-}
-
+// Create a generation model
 func Create(cfg *Config) Model {
 	if cfg.MapPrefix == "" {
 		cfg.MapPrefix = "MapOf"
@@ -73,12 +73,7 @@ func Create(cfg *Config) Model {
 
 	for _, f := range fieldList {
 		fieldName := f.Names[0].Name
-		fieldType, imports := resolveFieldType(cfg, f.Type)
-		field := FieldModel{
-			Name:     strcase.ToCamel(fieldName),
-			Type:     fieldType,
-			Accessor: fieldName,
-		}
+		field := resolveField(cfg, fieldName, f.Type)
 		if field.Type == "" {
 			continue
 		}
@@ -86,11 +81,10 @@ func Create(cfg *Config) Model {
 			field.Accessor += "()"
 		}
 		if result.Map.Key == nil && fieldName == cfg.KeyField {
-			result.Map.Key = &field
+			result.Map.Key = field
 		}
-		result.Imports = append(result.Imports, imports...)
 		if shouldGroupBy(cfg, fieldName) {
-			result.GroupBys = append(result.GroupBys, field)
+			result.GroupBys = append(result.GroupBys, *field)
 		}
 	}
 
@@ -109,41 +103,50 @@ func shouldGroupBy(cfg *Config, field string) bool {
 	return false
 }
 
-func resolveFieldType(cfg *Config, field ast.Expr) (string, []ImportModel) {
-	switch ft := field.(type) {
+func resolveField(cfg *Config, fieldName string, expr ast.Expr) *FieldModel {
+	field := FieldModel{
+		Name:     strcase.ToCamel(fieldName),
+		Accessor: fieldName,
+	}
+
+	switch ft := expr.(type) {
 	case *ast.StarExpr:
+		field.Pointer = true
 		switch i := ft.X.(type) {
 		case *ast.Ident:
-			return "*" + i.Name, nil
+			field.Type = i.Name
+			return &field
 		case *ast.SelectorExpr:
-			selectedType, imports := resolveFieldType(cfg, i.X)
+			field.Type = i.Sel.Name
+			selectedField := resolveField(cfg, field.Type, i.X)
+
 			for _, im := range cfg.Imports {
-				name := ""
+				importPath := im.Path.Value[1 : len(im.Path.Value)-1]
+				importName := ""
 				if im.Name != nil {
-					name = im.Name.Name
+					importName = im.Name.Name
 				}
-				if name == selectedType || strings.HasSuffix(im.Path.Value, "/"+selectedType+`"`) {
-					imports = append(imports, ImportModel{
-						Name: name,
-						Path: im.Path.Value,
-					})
+				if importName == selectedField.Type || strings.HasSuffix(importPath, "/"+selectedField.Type) {
+					field.Qual = importPath
 				}
 			}
-			return "*" + selectedType + "." + i.Sel.Name, imports
+			return &field
 		}
 	case *ast.Ident:
-		return ft.Name, nil
+		field.Type = ft.Name
+		return &field
 	case *ast.FuncType:
 		if ft.Results.NumFields() == 1 {
-			return resolveFieldType(cfg, ft.Results.List[0].Type)
+			return resolveField(cfg, fieldName, ft.Results.List[0].Type)
 		}
 	case *ast.ArrayType:
 		switch l := ft.Len.(type) {
 		case *ast.BasicLit:
-			return fmt.Sprintf("[%s]%s", l.Value, ft.Elt), nil
+			field.Type = fmt.Sprintf("[%s]%s", l.Value, ft.Elt)
+			return &field
 		}
 	}
 
 	logrus.Debugf("No generation for field of type: %#v", field)
-	return "", nil
+	return nil
 }

@@ -12,15 +12,6 @@ func (s SliceOfApple) GroupByBreed() map[string][]*Apple {
 	return result
 }
 
-// GroupByColor groups slice values by Color
-func (s SliceOfApple) GroupByColor() map[[4]byte][]*Apple {
-	result := make(map[[4]byte][]*Apple)
-	for _, value := range s {
-		result[value.Color] = append(result[value.Color], value)
-	}
-	return result
-}
-
 // AsMap maps slice values by Color
 func (s SliceOfApple) AsMap() MapOfApple {
 	result := make(MapOfApple)
@@ -65,15 +56,6 @@ func (m MapOfApple) GroupByBreed() map[string][]*Apple {
 	result := make(map[string][]*Apple)
 	for _, value := range m {
 		result[value.breed] = append(result[value.breed], value)
-	}
-	return result
-}
-
-// GroupByColor groups map values by Color
-func (m MapOfApple) GroupByColor() map[[4]byte][]*Apple {
-	result := make(map[[4]byte][]*Apple)
-	for _, value := range m {
-		result[value.Color] = append(result[value.Color], value)
 	}
 	return result
 }

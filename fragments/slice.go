@@ -55,7 +55,7 @@ func SliceOfAsMap(f *File, m model.Model) {
 func SliceOfGroupBys(f *File, m model.Model) {
 	for _, g := range m.GroupBys {
 		fnName := "GroupBy" + g.Name
-		outType := Map(Id(g.Type)).Index().Add(asType(m))
+		outType := Map(toType(g)).Index().Add(asType(m))
 
 		mappedField := Id("result").Index(Id("value").Dot(g.Accessor))
 
