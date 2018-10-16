@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"path"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
@@ -21,7 +22,11 @@ type specInfo struct {
 
 // Generate populates the targetPath with the funcy funcs for the targetType
 func Generate(targetPath, targetType string, cfg *model.Config) error {
-	basePath := path.Join(build.Default.GOPATH, "src", targetPath)
+	basePath := targetPath
+	goPathSrc := path.Join(build.Default.GOPATH, "src")
+	if !strings.HasPrefix(targetPath, goPathSrc) {
+		basePath = path.Join(build.Default.GOPATH, "src", targetPath)
+	}
 	pkg, err := build.ImportDir(basePath, build.ImportComment)
 	if err != nil {
 		return err
@@ -42,10 +47,6 @@ func writeType(basePath, sourcePackage string, cfg *model.Config) error {
 	f := jen.NewFile(sourcePackage)
 
 	m := model.Create(cfg)
-
-	for _, im := range m.Imports {
-		f.ImportName(im.Path, im.Name)
-	}
 
 	fragments.SliceOf(f, m)
 	fragments.SliceOfGroupBys(f, m)

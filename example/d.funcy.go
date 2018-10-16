@@ -1,5 +1,7 @@
 package example
 
+import sub "github.com/shousper/go-funcy/example/sub"
+
 // SliceOfD is a string slice of D
 type SliceOfD []D
 
