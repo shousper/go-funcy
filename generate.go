@@ -44,7 +44,7 @@ func writeType(basePath, sourcePackage string, cfg *model.Config) error {
 	m := model.Create(cfg)
 
 	for _, im := range m.Imports {
-		f.ImportName(im.Path.Value, "")
+		f.ImportName(im.Path, im.Name)
 	}
 
 	fragments.SliceOf(f, m)
