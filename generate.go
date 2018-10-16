@@ -25,8 +25,9 @@ func Generate(targetPath, targetType string, cfg *model.Config) error {
 	basePath := targetPath
 	goPathSrc := path.Join(build.Default.GOPATH, "src")
 	if !strings.HasPrefix(targetPath, goPathSrc) {
-		basePath = path.Join(build.Default.GOPATH, "src", targetPath)
+		basePath = path.Join(goPathSrc, targetPath)
 	}
+
 	pkg, err := build.ImportDir(basePath, build.ImportComment)
 	if err != nil {
 		return err

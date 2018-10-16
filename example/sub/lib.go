@@ -1,6 +1,6 @@
 package sub
 
-//go:generate funcy -path github.com/shousper/go-funcy/example/sub -type Apple -key-field Color -group-fields breed -v
+//go:generate funcy --path github.com/shousper/go-funcy/example/sub --key-field=Color -f breed -v Apple
 
 // Apple a delicious fruit!
 type Apple struct {

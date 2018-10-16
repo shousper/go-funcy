@@ -7,22 +7,22 @@ Yet another "generic" code generation tool. Inspired by [typewriter](https://git
 Basic CLI help:
 
 ```bash
-funcy -h
+funcy --help
 ```
 
 ```
-Usage of funcy:
-  -generators string
-    	Name of generators to run
-  -group-fields string
-    	Name of fields to group by (comma delimited)
-  -key-field string
-    	Name of map key field (default "ID")
-  -path string
-    	Type import path
-  -type string
-    	Name of type to generate against
-  -v	Verbose output
+funcy is a "generic" code generation tool
+
+Usage:
+  funcy [flags] TYPE
+
+Flags:
+  -g, --generators strings     list of generators to run
+  -f, --group-fields strings   name of fields on type to group by
+  -h, --help                   help for funcy
+  -k, --key-field string       name of field on type to populate map key (default "ID")
+  -p, --path string            Type import path, can be relative to GOPATH
+  -v, --verbose                verbose mode
 ```
 
 ### Example
@@ -44,14 +44,14 @@ type Foo struct {
 Add a `go:generate` like:
 
 ```go
-//go:generate funcy -path to/my-package -type Foo -key-field Key
+//go:generate funcy --path to/my-package -k Key Foo
 ```
 
 Or invoke manually, via `make`, whatever, and you'll get [this](./example/foo.funcy.go).
 
 ## Generators
 
-Maps (requires `-key-field` match):
+Maps (requires `--key-field` match):
 
 - [MapOf](./fragments/map.go#L9)
 - [MapOfKeys](./fragments/map.go#L19)
@@ -62,5 +62,5 @@ Maps (requires `-key-field` match):
 Slices:
 
 - [SliceOf](./fragments/slice.go#L9)
-- [SliceOfAsMap](./fragments/slice.go#L19) (requires `-key-field` match)
+- [SliceOfAsMap](./fragments/slice.go#L19) (requires `--key-field` match)
 - [SliceOfGroupBys](./fragments/slice.go#L45)
