@@ -74,7 +74,7 @@ func Create(cfg *Config) Model {
 	for _, f := range fieldList {
 		fieldName := f.Names[0].Name
 		field := resolveField(cfg, fieldName, f.Type)
-		if field.Type == "" {
+		if field == nil {
 			continue
 		}
 		if result.IsInterface {
