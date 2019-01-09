@@ -13,7 +13,7 @@ import (
 func MapOf(f *File, m model.Model) {
 	f.Commentf("%s is a string map of %s", m.Map.Name, m.Type)
 	f.Type().Id(m.Map.Name).
-		Map(Id(m.Map.Key.Type)).Add(asType(m))
+		Map(m.Map.Key.Type.AsCode()).Add(m.TypeCode())
 }
 
 // MapOfKeys produces a slice of the keys of the map
@@ -31,7 +31,7 @@ func MapOfKeys(f *File, m model.Model) {
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Keys").
 		Params().
-		Params(Id("keys").Index().Id(m.Map.Key.Type)).
+		Params(Id("keys").Index().Add(m.Map.Key.Type.AsCode())).
 		Block(
 			For(Id("key").Op(":=").Range().Id("m")).Block(
 				Id("keys").Op("=").Append(Id("keys"), Id("key")),
@@ -55,7 +55,7 @@ func MapOfValues(f *File, m model.Model) {
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Values").
 		Params().
-		Params(Id("values").Index().Add(asType(m))).
+		Params(Id("values").Index().Add(m.TypeCode())).
 		Block(
 			For(List(Id("_"), Id("value")).Op(":=").Range().Id("m")).Block(
 				Id("values").Op("=").Append(Id("values"), Id("value")),
@@ -81,7 +81,7 @@ func MapOfSelect(f *File, m model.Model) {
 	f.Func().
 		Params(Id("m").Id(m.Map.Name)).
 		Id("Select").
-		Params(Id("keys").Op("...").Id(m.Map.Key.Type)).
+		Params(Id("keys").Op("...").Add(m.Map.Key.Type.AsCode())).
 		Id(m.Map.Name).
 		Block(
 			Id("result").Op(":=").Make(Id(m.Map.Name)),
@@ -110,7 +110,7 @@ func MapOfSelect(f *File, m model.Model) {
 func MapOfGroupBys(f *File, m model.Model) {
 	for _, g := range m.GroupBys {
 		fnName := "GroupBy" + g.Name
-		outType := Map(toType(g)).Index().Add(asType(m))
+		outType := Map(g.Type.AsCode()).Index().Add(m.TypeCode())
 
 		mappedField := Id("result").Index(Id("value").Dot(g.Accessor))
 

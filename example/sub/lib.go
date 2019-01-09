@@ -7,3 +7,8 @@ type Apple struct {
 	breed string
 	Color [4]byte
 }
+
+// Trump a special breed of idiot
+type Trump struct {
+	Name string
+}

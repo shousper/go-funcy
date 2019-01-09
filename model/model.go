@@ -3,36 +3,12 @@ package model
 import (
 	"fmt"
 	"go/ast"
+	"reflect"
 	"strings"
 
 	"github.com/iancoleman/strcase"
 	"github.com/sirupsen/logrus"
 )
-
-// Model type information for generation output
-// Passed to fragments to create functions
-type Model struct {
-	Type        string
-	IsInterface bool
-	Map         MapModel
-	Slice       FieldModel
-	GroupBys    []FieldModel
-}
-
-// FieldModel represents struct or interface field/method information used for generation
-type FieldModel struct {
-	Name     string
-	Type     string
-	Qual     string
-	Pointer  bool
-	Accessor string
-}
-
-// MapModel represents information for map fragment generation
-type MapModel struct {
-	Name string
-	Key  *FieldModel
-}
 
 // Create a generation model
 func Create(cfg *Config) Model {
@@ -49,7 +25,7 @@ func Create(cfg *Config) Model {
 		Type: typeName,
 		Slice: FieldModel{
 			Name: cfg.SlicePrefix + typeName,
-			Type: typeName,
+			Type: TypeModel{Name: typeName},
 		},
 		Map: MapModel{
 			Name: cfg.MapPrefix + typeName,
@@ -63,7 +39,7 @@ func Create(cfg *Config) Model {
 		// Struct types are always pointers in slices or maps.
 		result.Type = typeName
 		// Slice type will be the pointer type
-		result.Slice.Type = result.Type
+		result.Slice.Type = TypeModel{Name: result.Type}
 
 		fieldList = v.Fields.List
 	case *ast.InterfaceType:
@@ -104,49 +80,57 @@ func shouldGroupBy(cfg *Config, field string) bool {
 }
 
 func resolveField(cfg *Config, fieldName string, expr ast.Expr) *FieldModel {
-	field := FieldModel{
+	fieldType := walkFieldType(cfg, &TypeModel{}, expr)
+	if fieldType == nil {
+		return nil
+	}
+	return &FieldModel{
 		Name:     strcase.ToCamel(fieldName),
 		Accessor: fieldName,
+		Type:     *fieldType,
 	}
+}
 
+func walkFieldType(cfg *Config, typ *TypeModel, expr ast.Expr) *TypeModel {
 	switch ft := expr.(type) {
 	case *ast.StarExpr:
-		field.Pointer = true
-		switch i := ft.X.(type) {
-		case *ast.Ident:
-			field.Type = i.Name
-			return &field
-		case *ast.SelectorExpr:
-			field.Type = i.Sel.Name
-			selectedField := resolveField(cfg, field.Type, i.X)
-
-			for _, im := range cfg.Imports {
-				importPath := im.Path.Value[1 : len(im.Path.Value)-1]
-				importName := ""
-				if im.Name != nil {
-					importName = im.Name.Name
-				}
-				if importName == selectedField.Type || strings.HasSuffix(importPath, "/"+selectedField.Type) {
-					field.Qual = importPath
-				}
-			}
-			return &field
-		}
+		typ.Pointer = true
+		return walkFieldType(cfg, typ, ft.X)
+	case *ast.SelectorExpr:
+		typ.Name = ft.Sel.Name
+		typ.Qualifier = resolveQualifier(cfg, ft.X)
+		return typ
 	case *ast.Ident:
-		field.Type = ft.Name
-		return &field
+		typ.Name = ft.Name
+		return typ
 	case *ast.FuncType:
 		if ft.Results.NumFields() == 1 {
-			return resolveField(cfg, fieldName, ft.Results.List[0].Type)
+			return walkFieldType(cfg, typ, ft.Results.List[0].Type)
 		}
 	case *ast.ArrayType:
 		switch l := ft.Len.(type) {
 		case *ast.BasicLit:
-			field.Type = fmt.Sprintf("[%s]%s", l.Value, ft.Elt)
-			return &field
+			typ.Name = fmt.Sprintf("[%s]%s", l.Value, ft.Elt)
+			return typ
 		}
 	}
 
-	logrus.Debugf("No generation for field of type: %#v", field)
+	// TODO("This basically means 'unsupported', handle it better.")
+	logrus.Debugf("No generation for type: %s", reflect.TypeOf(expr))
 	return nil
+}
+
+func resolveQualifier(cfg *Config, expr ast.Expr) string {
+	importedType := walkFieldType(cfg, &TypeModel{}, expr)
+	for _, im := range cfg.Imports {
+		importPath := im.Path.Value[1 : len(im.Path.Value)-1]
+		importName := ""
+		if im.Name != nil {
+			importName = im.Name.Name
+		}
+		if importName == importedType.Name || strings.HasSuffix(importPath, "/"+importedType.Name) {
+			return importPath
+		}
+	}
+	return ""
 }

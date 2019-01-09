@@ -25,4 +25,6 @@ type D interface {
 	E() string
 	// Apple the worlds first trillion dollar company
 	Apple() *sub.Apple
+	// X this is just a test, c'mon
+	X() sub.Trump
 }
