@@ -25,6 +25,15 @@ func (s SliceOfD) GroupByApple() map[*sub.Apple][]D {
 	return result
 }
 
+// GroupByX groups slice values by X()
+func (s SliceOfD) GroupByX() map[sub.Trump][]D {
+	result := make(map[sub.Trump][]D)
+	for _, value := range s {
+		result[value.X()] = append(result[value.X()], value)
+	}
+	return result
+}
+
 // AsMap maps slice values by E()
 func (s SliceOfD) AsMap() map[string]D {
 	result := make(map[string]D)
@@ -78,6 +87,15 @@ func (m MapOfD) GroupByApple() map[*sub.Apple][]D {
 	result := make(map[*sub.Apple][]D)
 	for _, value := range m {
 		result[value.Apple()] = append(result[value.Apple()], value)
+	}
+	return result
+}
+
+// GroupByX groups map values by X
+func (m MapOfD) GroupByX() map[sub.Trump][]D {
+	result := make(map[sub.Trump][]D)
+	for _, value := range m {
+		result[value.X()] = append(result[value.X()], value)
 	}
 	return result
 }

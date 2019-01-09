@@ -13,7 +13,7 @@ import (
 func SliceOf(f *File, m model.Model) {
 	f.Commentf("%s is a string slice of %s", m.Slice.Name, m.Type)
 	f.Type().Id(m.Slice.Name).
-		Index().Add(asType(m))
+		Index().Add(m.TypeCode())
 }
 
 // SliceOfAsMap produces a map from a slice grouping by its defined unique ID
@@ -27,7 +27,7 @@ func SliceOf(f *File, m model.Model) {
 //	}
 //
 func SliceOfAsMap(f *File, m model.Model) {
-	outType := Map(toType(*m.Map.Key)).Add(asType(m))
+	outType := Map(m.Map.Key.Type.AsCode()).Add(m.TypeCode())
 
 	f.Commentf("AsMap maps slice values by %s", m.Map.Key.Accessor)
 	f.Func().
@@ -57,7 +57,7 @@ func SliceOfAsMap(f *File, m model.Model) {
 func SliceOfGroupBys(f *File, m model.Model) {
 	for _, g := range m.GroupBys {
 		fnName := "GroupBy" + g.Name
-		outType := Map(toType(g)).Index().Add(asType(m))
+		outType := Map(g.Type.AsCode()).Index().Add(m.TypeCode())
 
 		mappedField := Id("result").Index(Id("value").Dot(g.Accessor))
 
